@@ -59,6 +59,10 @@ jobs:
 
 
     - name: Deploy Infra to AWS
-      run: terraform -v
+      uses: hashicorp/setup-terraform@v3
+      run: |
+        terraform -v
+        terraform plan 
+
 
     
