@@ -66,6 +66,7 @@ jobs:
         pwd
         ls -la
         terraform -v
+        terraform init
         terraform plan
       working-directory: infra
 
