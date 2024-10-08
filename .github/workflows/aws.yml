@@ -67,7 +67,7 @@ jobs:
         ls -la
         terraform -v
         terraform plan
-      # working-directory: ../../infra/
+      working-directory: infra
 
 
     
