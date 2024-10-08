@@ -63,6 +63,8 @@ jobs:
     
     - name: Deploy Infra to AWS
       run: |
+        pwd
+        ls -la
         terraform -v
         terraform plan
       working-directory: ../../infra/
