@@ -70,7 +70,6 @@ jobs:
         terraform plan
         output_value=$(terraform apply -auto-approve)
     
-        # Function to add dashes between characters
         format_with_dashes() {
           local value=$1
           local result=""
@@ -83,9 +82,8 @@ jobs:
           echo "$result"
         }
     
-    # Format and display the value
-    formatted_value=$(format_with_dashes "$output_value")
-    echo "Formatted output: $formatted_value"
+        formatted_value=$(format_with_dashes "$output_value")
+        echo "Formatted output: $formatted_value"
       working-directory: infra
 
 
