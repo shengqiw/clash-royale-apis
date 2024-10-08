@@ -52,14 +52,16 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+        
     - name: Echo Hello
       run: |
         echo "wassah dude"
         aws s3 ls
 
-
-    - name: Deploy Infra to AWS
+    - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+    
+    - name: Deploy Infra to AWS
       run: |
         terraform -v
         terraform plan 
