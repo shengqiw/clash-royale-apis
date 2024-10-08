@@ -68,6 +68,7 @@ jobs:
         terraform -v
         terraform init
         terraform plan
+        terraform apply
       working-directory: infra
 
 
