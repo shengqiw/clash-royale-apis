@@ -56,7 +56,6 @@ jobs:
     - name: Generate Lambda Packages
       run: |
         echo "wassah dude"
-        // zip existing lambda functions into its own zip file
         zip -r ./get-user-lambda.zip lambdas/get-user
 
     - name: Setup Terraform
