@@ -1,7 +1,10 @@
-export const getUser = async () => {
-    console.log('hello from getUser');
+export const getUser = async (event) => {
+    console.log('hello from getUser', event);
     return {
-        status: 200,
-        body: 'Hello from getUser'
+        statusCode: 200,
+        headers: {
+            "Access-Control-Allow-Origin": "*" 
+        },
+        body: "Hello from getUser"
     }
 }
