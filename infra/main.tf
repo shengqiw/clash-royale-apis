@@ -83,6 +83,6 @@ resource "aws_lambda_permission" "clash_user_lambda_permission" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
-  name              = "/aws/lambda/my_lambda"
+  name              = "/aws/lambda/get-user-lambda"
   retention_in_days = 7
 }
