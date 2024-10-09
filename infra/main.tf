@@ -24,5 +24,5 @@ resource "aws_lambda_function" "clash-user" {
     function_name = "get-user-lambda"
     role          = data.aws_iam_role.lambda-role.arn
     handler       = "lambdas/get-user/index.getUser"
-    runtime       = "nodejs16.x"
+    runtime       = "nodejs20.x"
 }
