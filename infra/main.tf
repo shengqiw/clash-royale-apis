@@ -28,7 +28,7 @@ resource "aws_apigatewayv2_api" "clash_gateway" {
 resource "aws_lambda_function" "clash_user_lambda" {
     filename      = "../get-user-lambda.zip"
     function_name = "get-user-lambda"
-    role          = data.aws_iam_role.lambda-role.arn
+    role          = data.aws_iam_role.lambda_role.arn
     handler       = "lambdas/get-user/index.getUser"
     runtime       = "nodejs20.x"
 }
