@@ -19,6 +19,27 @@ data "aws_iam_role" "lambda_role" {
     name = "lambdas"
 }
 
+resource "aws_iam_policy" "cloudwatch_policy" {
+  name = "lambda_cloudwatch_policy"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_attach" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.cloudwatch_policy.arn
+}
+
 resource "aws_apigatewayv2_api" "clash_gateway" {
     name          = "clash_gateway"
     protocol_type = "HTTP"
@@ -29,8 +50,9 @@ resource "aws_lambda_function" "clash_user_lambda" {
     filename      = "../get-user-lambda.zip"
     function_name = "get-user-lambda"
     role          = data.aws_iam_role.lambda_role.arn
-    handler       = "lambdas/get-user/index.getUser"
+    handler       = "index.getUser"
     runtime       = "nodejs20.x"
+    depends_on = [aws_iam_role_policy_attachment.lambda_cloudwatch_attach]
 }
 
 resource "aws_apigatewayv2_integration" "clash_user_integration" {
@@ -58,4 +80,9 @@ resource "aws_lambda_permission" "clash_user_lambda_permission" {
   function_name = aws_lambda_function.clash_user_lambda.arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:us-east-1:394414610569:${aws_apigatewayv2_api.clash_gateway.id}/*/*/user"
+}
+
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  name              = "/aws/lambda/my_lambda"
+  retention_in_days = 7
 }
