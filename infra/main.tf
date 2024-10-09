@@ -51,3 +51,11 @@ resource "aws_apigatewayv2_stage" "clash_user_stage" {
   name        = "$default"
   auto_deploy = true
 }
+
+resource "aws_lambda_permission" "clash_user_lambda_permission" {
+  statement_id  = "b4404d52-e199-571c-9de1-d80920177fc5"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.clash_user_lambda.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:us-east-1:394414610569:${aws_apigatewayv2_api.clash_gateway.id}/*/*/user"
+}
