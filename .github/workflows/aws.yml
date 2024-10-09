@@ -53,37 +53,20 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Echo Hello
+    - name: Generate Lambda Packages
       run: |
         echo "wassah dude"
-        aws s3 ls
+        // zip existing lambda functions into its own zip file
+        zip -r ./get-user-lambda.zip lambdas/get-user
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
     
     - name: Deploy Infra to AWS
       run: |
-        pwd
-        ls -la
-        terraform -v
         terraform init
         terraform plan
-        output_value=$(terraform apply -auto-approve)
-    
-        format_with_dashes() {
-          local value=$1
-          local result=""
-          for (( i=0; i<${#value}; i++ )); do
-            if [ $i -ne 0 ]; then
-              result+="-"
-            fi
-            result+="${value:$i:1}"
-          done
-          echo "$result"
-        }
-    
-        formatted_value=$(format_with_dashes "$output_value")
-        echo "Formatted output: $formatted_value"
+        terraform apply -auto-approve
       working-directory: infra
 
 

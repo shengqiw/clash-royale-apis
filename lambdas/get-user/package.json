@@ -1,0 +1,12 @@
+{
+  "name": "get-user",
+  "version": "1.0.0",
+  "description": "get clash royale user",
+  "main": "index.mjs",
+  "scripts": {
+    "dev": "node test.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "shen",
+  "license": "ISC"
+}

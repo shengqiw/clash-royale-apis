@@ -2,8 +2,14 @@ provider "aws" {
     region = "us-east-1"
 }
 
-data "aws_caller_identity" "role" {}
+data "aws_iam_role" "lambda-role" {
+    name = "lambdas"
+}
 
-output "role" {
-  value = data.aws_caller_identity.role.account_id
+resource "aws_lambda_function" "clash-user" {
+    filename      = "../get-user-lambda.zip"
+    function_name = "get-user-lambda"
+    role          = aws_iam_role.lambda-role.arn
+    handler       = "lambdas/get-user/index.getUser"
+    runtime       = "nodejs22.x"
 }
