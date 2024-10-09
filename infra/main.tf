@@ -53,7 +53,7 @@ data "archive_file" "get_user_lambda_zip" {
 }
 resource "aws_lambda_function" "clash_user_lambda" {
     filename      = data.archive_file.get_user_lambda_zip.output_path
-    source_code_hash = data.archive_file.my_function_lambda_payload.output_base64sha256
+    source_code_hash = data.archive_file.get_user_lambda_zip.output_base64sha256
     function_name = "get-user-lambda"
     role          = data.aws_iam_role.lambda_role.arn
     handler       = "index.getUser"
