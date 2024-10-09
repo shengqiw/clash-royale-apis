@@ -1,4 +1,4 @@
-export const getUser = () => {
+export const getUser = async () => {
     console.log('hello from getUser');
     return {
         status: 200,
