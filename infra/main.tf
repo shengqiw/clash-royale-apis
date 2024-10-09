@@ -9,7 +9,7 @@ data "aws_iam_role" "lambda-role" {
 resource "aws_lambda_function" "clash-user" {
     filename      = "../get-user-lambda.zip"
     function_name = "get-user-lambda"
-    role          = aws_iam_role.lambda-role.arn
+    role          = data.aws_iam_role.lambda-role.arn
     handler       = "lambdas/get-user/index.getUser"
     runtime       = "nodejs22.x"
 }
