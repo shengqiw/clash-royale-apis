@@ -46,8 +46,14 @@ resource "aws_apigatewayv2_api" "clash_gateway" {
 
 }
 
+data "archive_file" "get_user_lambda_zip" {
+    type        = "zip"
+    source_dir  = "../lambdas/get-user/"
+    output_path = "../get-user-lambda.zip"
+}
 resource "aws_lambda_function" "clash_user_lambda" {
-    filename      = "../get-user-lambda.zip"
+    filename      = data.archive_file.get_user_lambda_zip.output_path
+    source_code_hash = data.archive_file.my_function_lambda_payload.output_base64sha256
     function_name = "get-user-lambda"
     role          = data.aws_iam_role.lambda_role.arn
     handler       = "index.getUser"

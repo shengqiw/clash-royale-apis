@@ -56,8 +56,7 @@ jobs:
     - name: Generate Lambda Packages
       run: |
         echo "wassah dude"
-        rm -f ./get-user-lambda.zip
-        zip -rj ./get-user-lambda.zip lambdas/get-user/*
+        ls -la
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
