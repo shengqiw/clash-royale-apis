@@ -36,7 +36,7 @@ resource "aws_iam_policy" "cloudwatch_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_attach" {
-  role       = aws_iam_role.lambda_role.name
+  role       = data.aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.cloudwatch_policy.arn
 }
 
