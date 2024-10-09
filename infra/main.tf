@@ -11,7 +11,7 @@ terraform {
     }
     backend "s3" {
         bucket = "clash-terraform-state"
-      
+        key = "lambdas/terraform.tfstate"
     }
 }
 
