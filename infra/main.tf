@@ -75,11 +75,11 @@ resource "aws_apigatewayv2_stage" "clash_user_stage" {
 }
 
 resource "aws_lambda_permission" "clash_user_lambda_permission" {
-  statement_id  = "b4404d52-e199-571c-9de1-d80920177fc5"
+  statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.clash_user_lambda.arn
+  function_name = aws_lambda_function.clash_user_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:us-east-1:394414610569:${aws_apigatewayv2_api.clash_gateway.id}/*/*/user"
+  source_arn    = "arn:aws:execute-api:us-east-1:394414610569:${aws_apigatewayv2_api.clash_gateway.id}/*"
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
