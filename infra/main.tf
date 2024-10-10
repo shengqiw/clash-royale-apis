@@ -78,7 +78,7 @@ resource "aws_lambda_function" "clash_user_lambda" {
 
     vpc_config {
         subnet_ids         = data.aws_subnets.private_subnets.ids
-        security_group_ids = data.aws_security_group.lambda_sg.ids
+        security_group_ids = data.aws_security_groups.lambda_sg.ids
     }
 }
 
