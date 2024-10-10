@@ -15,11 +15,6 @@ terraform {
     }
 }
 
-data "aws_iam_role" "lambda_role" {
-    name = "lambdas"
-}
-
-
 module "api_gateway" {
     source = "./modules/api-gateway"
 
@@ -31,12 +26,7 @@ module "iam_policy" {
     
     lambda_role_name = data.aws_iam_role.lambda_role.name
 }
-
-data "archive_file" "get_user_lambda_zip" {
-    type        = "zip"
-    source_dir  = "../lambdas/get-user/"
-    output_path = "../get-user-lambda.zip"
-}
+data "aws_iam_role" "lambda_role" { name = "lambdas" }
 
 data "aws_subnets" "private_subnets" {
   filter {
@@ -52,7 +42,14 @@ data "aws_security_groups" "lambda_sg" {
   }
 }
 
+
+
 // GET USER LAMBDA
+data "archive_file" "get_user_lambda_zip" {
+    type        = "zip"
+    source_dir  = "../lambdas/get-user/"
+    output_path = "../get-user-lambda.zip"
+}
 
 resource "aws_lambda_function" "clash_user_lambda" {
     filename      = data.archive_file.get_user_lambda_zip.output_path
@@ -85,6 +82,12 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 
 
 // GET CLAN LAMBDA
+
+data "archive_file" "get_clan_lambda_zip" {
+    type        = "zip"
+    source_dir  = "../lambdas/get-clan/"
+    output_path = "../get-clan-lambda.zip"
+}
 
 resource "aws_lambda_function" "clash_clan_lambda" {
     filename      = data.archive_file.get_clan_lambda_zip.output_path
