@@ -1,8 +1,8 @@
 /* global fetch */
 export const getUser = async (event) => {
-    console.log('hello from getUser', event);
+    console.log('hello from getUser', event.queryStringParameters);
 
-    if (!event.id) {
+    if (!Object.keys(event.queryStringParameters).length) {
         return {
             statusCode: 400,
             headers: {
@@ -14,7 +14,7 @@ export const getUser = async (event) => {
     
     const jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjMwZTg3ZmJjLTFjZTktNDAxZi05ZjgwLTAxMWE3MzFhNzcyNCIsImlhdCI6MTcyODUxNjgyMywic3ViIjoiZGV2ZWxvcGVyLzIxNjZhMjY0LTk2NjAtMTUxYi1iY2I0LTFiNTE1ODQzY2NiMiIsInNjb3BlcyI6WyJyb3lhbGUiXSwibGltaXRzIjpbeyJ0aWVyIjoiZGV2ZWxvcGVyL3NpbHZlciIsInR5cGUiOiJ0aHJvdHRsaW5nIn0seyJjaWRycyI6WyIzNC4yMzAuMTYyLjE0NCJdLCJ0eXBlIjoiY2xpZW50In1dfQ.L8iqiaQqKb5stziiXPZHppASSDX4vFgBse1x_IY7OJSBDgfjXamO3DnCmbAXB5c6w0MEvKBcDe-qGsZNXmXLJA";
     
-    const playerId = event.id.startsWith("#") ? 
+    const playerId = event.queryStringParameters.id.trim().startsWith("#") ? 
         event.id.trim() :
         `#${event.id.trim()}`;
     
