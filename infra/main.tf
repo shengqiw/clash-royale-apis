@@ -21,11 +21,11 @@ data "aws_iam_role" "lambda_role" {
 
 
 module "api_gateway" {
-    source = "../modules/api-gateway"
+    source = "./modules/api-gateway"
 }
 
 module "iam_policy" {
-    source = "../modules/iam"
+    source = "./modules/iam"
 }
 
 data "archive_file" "get_user_lambda_zip" {
