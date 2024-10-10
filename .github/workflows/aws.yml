@@ -64,7 +64,8 @@ jobs:
     - name: Deploy Infra to AWS
       run: |
         terraform init
-        terraform refresh
+        terraform state mv aws_apigatewayv2_api.clash_gateway module.api_gateway.clash_gateway
+        terraform state mv aws_iam_role_policy_attachment.lambda_cloudwatch_attach module.iam_policy.cloudwatch_policy
         terraform plan
         terraform apply -auto-approve
       working-directory: infra
