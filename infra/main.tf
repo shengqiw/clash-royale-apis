@@ -20,7 +20,7 @@ data "aws_iam_role" "lambda_role" {
 }
 
 
-module "clash_gateway" {
+module "api_gateway" {
     source = "./modules/api-gateway"
 
     lambda_invoke_arn = aws_lambda_function.clash_user_lambda.invoke_arn
