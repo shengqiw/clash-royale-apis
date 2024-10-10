@@ -28,6 +28,8 @@ module "api_gateway" {
 
 module "iam_policy" {
     source = "./modules/iam"
+    
+    lambda_role_name = data.aws_iam_role.lambda_role.name
 }
 
 data "archive_file" "get_user_lambda_zip" {
