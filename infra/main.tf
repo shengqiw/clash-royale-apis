@@ -26,7 +26,7 @@ module "clash_gateway" {
     lambda_invoke_arn = aws_lambda_function.clash_user_lambda.invoke_arn
 }
 
-module "cloudwatch_policy" {
+module "iam_policy" {
     source = "./modules/iam"
     
     lambda_role_name = data.aws_iam_role.lambda_role.name
