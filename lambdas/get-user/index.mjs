@@ -34,6 +34,6 @@ export const getUser = async (event) => {
         headers: {
             "Access-Control-Allow-Origin": "*" 
         },
-        body: "Hello from getUser"
+        body: JSON.stringify(userData)
     }
 }
