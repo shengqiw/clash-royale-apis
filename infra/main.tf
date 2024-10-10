@@ -51,6 +51,22 @@ data "archive_file" "get_user_lambda_zip" {
     source_dir  = "../lambdas/get-user/"
     output_path = "../get-user-lambda.zip"
 }
+
+data "aws_subnets" "private_subnets" {
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"]
+  }
+}
+
+data "aws_security_group" "lambda_sg" {
+  filter {
+    name   = "tag:Name"
+    values = ["lambda-sg"]
+  }
+}
+
+
 resource "aws_lambda_function" "clash_user_lambda" {
     filename      = data.archive_file.get_user_lambda_zip.output_path
     source_code_hash = data.archive_file.get_user_lambda_zip.output_base64sha256
@@ -59,6 +75,11 @@ resource "aws_lambda_function" "clash_user_lambda" {
     handler       = "index.getUser"
     runtime       = "nodejs20.x"
     depends_on = [aws_iam_role_policy_attachment.lambda_cloudwatch_attach]
+
+    vpc_config {
+        subnet_ids         = data.aws_subnets.private_subnets.ids
+        security_group_ids = data.aws_security_group.lambda_sg.ids
+    }
 }
 
 resource "aws_apigatewayv2_integration" "clash_user_integration" {
