@@ -1,7 +1,7 @@
 export const getClan = async (event) => {
     const unrefinedId = event.queryStringParameters?.id;
 
-    console.log('hello from getUser', event.queryStringParameters);
+    console.log('hello from getClan', event.queryStringParameters);
 
     if (!unrefinedId) {
         return {
