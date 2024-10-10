@@ -18,7 +18,7 @@ export const getUser = async (event) => {
     const playerId = unrefinedId.trim().startsWith("#") ? 
         unrefinedId.trim() :
         `#${unrefinedId.trim()}`;
-    
+    console.log('playerId', playerId);
     const res = await fetch(`https://api.clashroyale.com/v1/players/${playerId}`, {
         headers: {
             "Authorization": `Bearer ${jwtToken}`,
@@ -26,6 +26,13 @@ export const getUser = async (event) => {
         }
     });
     console.log('res', res);
+    
+    if (res.status === 404) {
+        return {
+            statusCode: 404,
+            body: "Player not found"
+        }
+    }
     const userData = await res.json();
     
     console.log('userData', userData)
