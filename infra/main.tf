@@ -62,7 +62,7 @@ data "aws_subnets" "private_subnets" {
 data "aws_security_groups" "lambda_sg" {
   filter {
     name   = "tag:Name"
-    values = ["lambda-sg"]
+    values = ["default"]
   }
 }
 
