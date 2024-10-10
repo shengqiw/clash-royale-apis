@@ -6,7 +6,7 @@ resource "aws_apigatewayv2_api" "clash_gateway" {
 resource "aws_apigatewayv2_integration" "clash_user_integration" {
     api_id             = aws_apigatewayv2_api.clash_gateway.id
     integration_type   = "AWS_PROXY"
-    integration_uri    = aws_lambda_function.clash_user_lambda.invoke_arn
+    integration_uri    = var.lambda_invoke_arn
     integration_method = "POST"
 }
 
