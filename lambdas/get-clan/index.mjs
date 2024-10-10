@@ -12,4 +12,9 @@ export const getClan = async (event) => {
             body: "Missing id"
         }
     }
+
+    return {
+        statusCode: 200,
+        body: 'Hello from getClan'
+    }
 }
