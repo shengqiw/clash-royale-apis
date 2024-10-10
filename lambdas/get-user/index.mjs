@@ -25,7 +25,7 @@ export const getUser = async (event) => {
             "Content-Type": "application/json"
         }
     });
-    
+    console.log('res', res);
     const userData = await res.json();
     
     console.log('userData', userData)
