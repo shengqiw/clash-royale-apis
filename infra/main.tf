@@ -18,7 +18,9 @@ terraform {
 module "api_gateway" {
     source = "./modules/api-gateway"
 
-    lambda_invoke_arn = aws_lambda_function.clash_user_lambda.invoke_arn
+    lambda_invoke_arn_user = aws_lambda_function.clash_user_lambda.invoke_arn
+    lambda_invoke_arn_clan = aws_lambda_function.clash_clan_lambda.invoke_arn
+
 }
 
 module "iam_policy" {
