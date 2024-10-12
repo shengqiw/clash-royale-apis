@@ -29,8 +29,13 @@ resource "aws_apigatewayv2_route" "clash_clan_route" {
     target    = "integrations/${aws_apigatewayv2_integration.clash_clan_integration.id}"
 }
 
-resource "aws_apigatewayv2_stage" "clash_user_stage" {
+resource "aws_apigatewayv2_stage" "clash_stage_prod" {
   api_id      = aws_apigatewayv2_api.clash_gateway.id
   name        = "$default"
   auto_deploy = true
+
+  default_route_settings {
+    throttling_burst_limit = 20
+    throttling_rate_limit  = 10
+  }
 }
