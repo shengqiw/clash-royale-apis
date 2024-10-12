@@ -75,7 +75,7 @@ resource "aws_lambda_permission" "clash_user_lambda_permission" {
   source_arn    = "arn:aws:execute-api:us-east-1:394414610569:${module.api_gateway.clash_gateway.id}/*"
 }
 
-resource "aws_cloudwatch_log_group" "lambda_log_group" {
+resource "aws_cloudwatch_log_group" "lambda_log_group_user" {
   name              = "/aws/lambda/get-user-lambda"
   retention_in_days = 7
 }
@@ -105,7 +105,7 @@ resource "aws_lambda_function" "clash_clan_lambda" {
 }
 
 
-resource "aws_lambda_permission" "clash_user_lambda_permission" {
+resource "aws_lambda_permission" "clash_clan_lambda_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.clash_clan_lambda.function_name
@@ -113,7 +113,7 @@ resource "aws_lambda_permission" "clash_user_lambda_permission" {
   source_arn    = "arn:aws:execute-api:us-east-1:394414610569:${module.api_gateway.clash_gateway.id}/*"
 }
 
-resource "aws_cloudwatch_log_group" "lambda_log_group" {
+resource "aws_cloudwatch_log_group" "lambda_log_group_clan" {
   name              = "/aws/lambda/get-clan-lambda"
   retention_in_days = 7
 }
