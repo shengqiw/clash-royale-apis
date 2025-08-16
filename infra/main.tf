@@ -30,21 +30,144 @@ module "iam_policy" {
 }
 data "aws_iam_role" "lambda_role" { name = "lambdas" }
 
-data "aws_subnets" "private_subnets" {
-  filter {
-    name   = "tag:Name"
-    values = ["*private*"]
-  }
-}
-
-data "aws_security_groups" "lambda_sg" {
+data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
     values = ["default"]
   }
 }
 
+data "aws_subnet" "public_subnet" {
+  vpc_id            = data.aws_vpc.main.id
+  tags              = { Name = "jeetio-public" }
+}
 
+resource "aws_subnet" "private_subnet" {
+  vpc_id            = data.aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1a"
+  tags              = { Name = "jeetio-private" }
+}
+
+data "aws_internet_gateway" "igw" {
+  filter {
+    name   = "tag:Name"
+    values = ["default"]
+  }
+}
+
+data "aws_route_table" "public_rt" {
+  filter {
+    name   = "tag:Name"
+    values = ["default"]
+  }
+}
+
+data "aws_route" "public_internet_access" {
+  route_table_id = data.aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "public_assoc" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.main.id
+}
+
+// Target for NAT EC2 instance
+resource "aws_route" "private_nat_access" {
+  route_table_id         = aws_route_table.private_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  instance_id            = aws_instance.nat.id
+}
+
+resource "aws_route_table_association" "private_assoc" {
+  subnet_id      = aws_subnet.private.id
+  route_table_id = aws_route_table.private_rt.id
+}
+
+# Security groups
+resource "aws_security_group" "nat_sg" {
+  name        = "jeetio-nat-sg"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["YOUR_IP/32"] # Replace later
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "lambda_sg" {
+  name   = "jeetio-lambda-sg"
+  vpc_id = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_iam_role" "ssm_role" {
+  name = "nat-ssm-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = { Service = "ec2.amazonaws.com" },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_policy" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm_profile" {
+  name = "nat-ssm-profile"
+  role = aws_iam_role.ssm_role.name
+}
+
+resource "aws_instance" "nat" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = "t4g.nano"
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.nat_sg.id]
+  depends_on                  = [aws_internet_gateway.igw]
+  iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
+  tags = { Name = "jeetio-nat" }
+
+  user_data = <<-EOF
+              #!/bin/bash
+              sysctl -w net.ipv4.ip_forward=1
+              yum install -y iptables-services
+              service iptables start
+              iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+              service iptables save
+              EOF
+}
+
+# Allocate EIP to NAT instance
+resource "aws_eip_association" "nat_assoc" {
+  instance_id = aws_instance.nat.id
+  allocation_id = aws_eip.nat.id
+}
 
 // GET USER LAMBDA
 data "archive_file" "get_user_lambda_zip" {
@@ -63,8 +186,8 @@ resource "aws_lambda_function" "clash_user_lambda" {
     depends_on = [module.iam_policy.cloudwatch_policy]
 
     vpc_config {
-        subnet_ids         = data.aws_subnets.private_subnets.ids
-        security_group_ids = data.aws_security_groups.lambda_sg.ids
+        subnet_ids         = [aws_subnet.private_subnet.id]
+        security_group_ids = aws_security_group.lambda_sg.ids
     }
 }
 
@@ -101,7 +224,7 @@ resource "aws_lambda_function" "clash_clan_lambda" {
     depends_on = [module.iam_policy.cloudwatch_policy]
 
     vpc_config {
-        subnet_ids         = data.aws_subnets.private_subnets.ids
+        subnet_ids         = [aws_subnet.private_subnet.id]
         security_group_ids = data.aws_security_groups.lambda_sg.ids
     }
 }
