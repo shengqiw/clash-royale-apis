@@ -88,7 +88,7 @@ resource "aws_route_table" "private_rt" {
 resource "aws_route" "private_nat_access" {
   route_table_id         = aws_route_table.private_rt.id
   destination_cidr_block = "0.0.0.0/0"
-  instance_id            = aws_instance.nat.id
+  network_interface_id   = aws_instance.nat.primary_network_interface_id
 }
 
 resource "aws_route_table_association" "private_assoc" {
