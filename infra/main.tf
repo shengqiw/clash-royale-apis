@@ -68,12 +68,12 @@ data "aws_route" "public_internet_access" {
 }
 
 resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public_rt.id
+  subnet_id      = data.aws_subnet.public.id
+  route_table_id = data.aws_route_table.public_rt.id
 }
 
 resource "aws_route_table" "private_rt" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.main.id
 }
 
 // Target for NAT EC2 instance
@@ -91,7 +91,7 @@ resource "aws_route_table_association" "private_assoc" {
 # Security groups
 resource "aws_security_group" "nat_sg" {
   name        = "jeetio-nat-sg"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = data.aws_vpc.main.id
 
   ingress {
     description = "SSH"
@@ -111,7 +111,7 @@ resource "aws_security_group" "nat_sg" {
 
 resource "aws_security_group" "lambda_sg" {
   name   = "jeetio-lambda-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.main.id
 
   egress {
     from_port   = 0
@@ -186,8 +186,8 @@ resource "aws_lambda_function" "clash_user_lambda" {
     depends_on = [module.iam_policy.cloudwatch_policy]
 
     vpc_config {
-        subnet_ids         = [aws_subnet.private_subnet.id]
-        security_group_ids = aws_security_group.lambda_sg.ids
+    subnet_ids         = [aws_subnet.private_subnet.id]
+    security_group_ids = [aws_security_group.lambda_sg.id]
     }
 }
 
@@ -224,10 +224,11 @@ resource "aws_lambda_function" "clash_clan_lambda" {
     depends_on = [module.iam_policy.cloudwatch_policy]
 
     vpc_config {
-        subnet_ids         = [aws_subnet.private_subnet.id]
-        security_group_ids = data.aws_security_groups.lambda_sg.ids
+    subnet_ids         = [aws_subnet.private_subnet.id]
+    security_group_ids = [aws_security_group.lambda_sg.id]
     }
 }
+
 
 
 resource "aws_lambda_permission" "clash_clan_lambda_permission" {
