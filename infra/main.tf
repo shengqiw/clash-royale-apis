@@ -21,8 +21,18 @@ terraform {
 # Data sources
 # -----------------
 
-data "aws_iam_role" "lambda_role" {
+resource "aws_iam_role" "lambda_role" {
   name = "lambdas"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
 }
 
 data "aws_vpc" "main" {
@@ -53,6 +63,7 @@ data "aws_route_table" "public_rt" {
 
 data "aws_route" "public_internet_access" {
   route_table_id = data.aws_route_table.public_rt.id
+  destination_cidr_block = "0.0.0.0/0"
 }
 
 data "aws_ami" "amazon_linux" {
@@ -203,7 +214,7 @@ module "api_gateway" {
 
 module "iam_policy" {
   source = "./modules/iam"
-  lambda_role_name = data.aws_iam_role.lambda_role.name
+  lambda_role_name = aws_iam_role.lambda_role.name
 }
 
 # GET USER LAMBDA
@@ -217,7 +228,7 @@ resource "aws_lambda_function" "clash_user_lambda" {
   filename         = data.archive_file.get_user_lambda_zip.output_path
   source_code_hash = data.archive_file.get_user_lambda_zip.output_base64sha256
   function_name    = "get-user-lambda"
-  role             = data.aws_iam_role.lambda_role.arn
+  role             = aws_iam_role.lambda_role.arn
   handler          = "index.getUser"
   runtime          = "nodejs20.x"
   depends_on       = [module.iam_policy.cloudwatch_policy]
@@ -252,7 +263,7 @@ resource "aws_lambda_function" "clash_clan_lambda" {
   filename         = data.archive_file.get_clan_lambda_zip.output_path
   source_code_hash = data.archive_file.get_clan_lambda_zip.output_base64sha256
   function_name    = "get-clan-lambda"
-  role             = data.aws_iam_role.lambda_role.arn
+  role             = aws_iam_role.lambda_role.arn
   handler          = "index.getClan"
   runtime          = "nodejs20.x"
   depends_on       = [module.iam_policy.cloudwatch_policy]
