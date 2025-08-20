@@ -153,7 +153,6 @@ resource "aws_instance" "nat" {
   subnet_id                   = data.aws_subnet.public_subnet.id
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.nat_sg.id]
-  iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
   tags = { Name = "jeetio-nat" }
 
   user_data = <<-EOF
