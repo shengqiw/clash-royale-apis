@@ -82,7 +82,7 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_subnet" "private_subnet" {
   vpc_id            = data.aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
+  cidr_block        = "172.31.96.0/20"
   availability_zone = "us-east-1a"
   tags              = { Name = "jeetio-private" }
 }
@@ -149,12 +149,12 @@ resource "aws_security_group" "lambda_sg" {
 
 resource "aws_instance" "nat" {
   ami                         = data.aws_ami.amazon_linux.id
-  instance_type               = "t4g.nano"
+  instance_type               = "t3.nano"
   subnet_id                   = data.aws_subnet.public_subnet.id
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.nat_sg.id]
   tags = { Name = "jeetio-nat" }
-
+  source_dest_check = false
   user_data = <<-EOF
               #!/bin/bash
               sysctl -w net.ipv4.ip_forward=1
