@@ -148,8 +148,17 @@ resource "aws_security_group" "nat_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["10.0.2.0/24"]
+    cidr_blocks = ["172.31.96.0/20"]
   }
+
+  ingress {
+    description     = "EC2 Instance Connect"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    prefix_list_ids = ["pl-0e4bcff02b13bef1e"]
+  }
+
 
   egress {
     from_port   = 0
