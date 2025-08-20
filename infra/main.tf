@@ -122,6 +122,10 @@ resource "aws_route_table_association" "public_assoc" {
 
 resource "aws_route_table" "private_rt" {
   vpc_id = data.aws_vpc.main.id
+
+  tags = {
+    Name = "jeetio-private-rt"
+  }
 }
 
 resource "aws_route" "private_nat_access" {
