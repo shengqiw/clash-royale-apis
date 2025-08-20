@@ -35,6 +35,34 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
+# -----------------
+# Lambdas & API Gateway
+# -----------------
+
+module "api_gateway" {
+  source = "./modules/api-gateway"
+
+  lambda_invoke_arn_user = aws_lambda_function.clash_user_lambda.invoke_arn
+  lambda_invoke_arn_clan = aws_lambda_function.clash_clan_lambda.invoke_arn
+}
+
+module "iam_policy" {
+  source = "./modules/iam"
+  lambda_role_name = aws_iam_role.lambda_role.name
+}
+
+# Basic Lambda execution policy (for CloudWatch Logs)
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.lambda_role.name
+}
+
+# VPC access policy (required for Lambda in VPC)
+resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+  role       = aws_iam_role.lambda_role.name
+}
+
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
@@ -174,21 +202,7 @@ resource "aws_eip_association" "nat_assoc" {
   allocation_id = aws_eip.nat.id
 }
 
-# -----------------
-# Lambdas & API Gateway
-# -----------------
 
-module "api_gateway" {
-  source = "./modules/api-gateway"
-
-  lambda_invoke_arn_user = aws_lambda_function.clash_user_lambda.invoke_arn
-  lambda_invoke_arn_clan = aws_lambda_function.clash_clan_lambda.invoke_arn
-}
-
-module "iam_policy" {
-  source = "./modules/iam"
-  lambda_role_name = aws_iam_role.lambda_role.name
-}
 
 # GET USER LAMBDA
 data "archive_file" "get_user_lambda_zip" {
