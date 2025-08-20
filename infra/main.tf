@@ -195,10 +195,12 @@ resource "aws_instance" "nat" {
   user_data = <<-EOF
               #!/bin/bash
               sysctl -w net.ipv4.ip_forward=1
+              echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf
               yum install -y iptables-services
               service iptables start
-              iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+              iptables -t nat -A POSTROUTING -o eth0 -s 172.31.0.0/16 -j MASQUERADE
               service iptables save
+              chkconfig iptables on
               EOF
 }
 
