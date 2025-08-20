@@ -230,6 +230,7 @@ resource "aws_lambda_function" "clash_user_lambda" {
   handler          = "index.getUser"
   runtime          = "nodejs20.x"
   depends_on       = [module.iam_policy.cloudwatch_policy]
+  timeout          = 10
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_subnet.id]
@@ -265,6 +266,7 @@ resource "aws_lambda_function" "clash_clan_lambda" {
   handler          = "index.getClan"
   runtime          = "nodejs20.x"
   depends_on       = [module.iam_policy.cloudwatch_policy]
+  timeout          = 10
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_subnet.id]
