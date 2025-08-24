@@ -175,6 +175,10 @@ resource "aws_security_group" "nat_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
+  tags = {
+    Name = "jeetio-nat-sg"
+  }
 }
 
 resource "aws_security_group" "lambda_sg" {
@@ -204,28 +208,51 @@ resource "aws_instance" "nat" {
   
   user_data = <<-EOF
               #!/bin/bash
-              # Update system
+              # System Update and Preparation
               dnf update -y
-              
-              # Enable IP forwarding
+
+              # Install necessary packages
+              dnf install -y \
+                  iptables-services \
+                  ec2-instance-connect \
+                  aws-cli \
+                  https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+
+              # Network and IP Forwarding Configuration
               sysctl -w net.ipv4.ip_forward=1
-              echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
-              
-              # Install and configure iptables
-              dnf install -y iptables-services
+              echo 'net.ipv4.ip_forward=1' | tee -a /etc/sysctl.conf
+              sysctl -p
+
+              # SSH Configuration for Enhanced Connectivity
+              sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+              sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+
+              # Iptables NAT Configuration
               systemctl enable iptables
               systemctl start iptables
-              
-              # Configure NAT rules - Fixed the interface names and rules
+
+              # Clear existing rules first
+              iptables -F
+              iptables -X
+              iptables -t nat -F
+              iptables -t nat -X
+
+              # NAT and Forwarding Rules
               iptables -t nat -A POSTROUTING -o ens5 -s 172.31.0.0/16 -j MASQUERADE
               iptables -A FORWARD -i ens5 -o ens5 -m state --state RELATED,ESTABLISHED -j ACCEPT
               iptables -A FORWARD -i ens5 -o ens5 -j ACCEPT
-              
-              # Save iptables rules
+
+              # Save and persist iptables rules
               service iptables save
-              
-              # Make sure services start on boot
+
+              # Enable and start system services
               systemctl enable iptables
+              systemctl enable amazon-ssm-agent
+              systemctl restart sshd
+              systemctl start amazon-ssm-agent
+
+              # Optional: Log the completion of setup
+              echo "NAT and connectivity setup completed" >> /var/log/user-data.log
               EOF
 }
 
