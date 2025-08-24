@@ -100,7 +100,12 @@ data "aws_ami" "amazon_linux" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+    values = ["al2023-ami-*-x86_64"]  # Changed from amzn2-ami-hvm-*
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
 
@@ -194,20 +199,32 @@ resource "aws_instance" "nat" {
   subnet_id                   = data.aws_subnet.public_subnet.id
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.nat_sg.id]
-  tags = { Name = "jeetio-nat" }
-  source_dest_check = false
+  tags                        = { Name = "jeetio-nat" }
+  source_dest_check          = false
+  
   user_data = <<-EOF
               #!/bin/bash
-              yum update -y
+              # Update system
+              dnf update -y
+              
+              # Enable IP forwarding
               sysctl -w net.ipv4.ip_forward=1
-              echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf
-              yum install -y iptables-services
-              service iptables start
-              iptables -t nat -A POSTROUTING -o eth0 -s 172.31.0.0/16 -j MASQUERADE
-              iptables -A FORWARD -i eth0 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-              iptables -A FORWARD -i eth0 -o eth0 -j ACCEPT
+              echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+              
+              # Install and configure iptables
+              dnf install -y iptables-services
+              systemctl enable iptables
+              systemctl start iptables
+              
+              # Configure NAT rules - Fixed the interface names and rules
+              iptables -t nat -A POSTROUTING -o ens5 -s 172.31.0.0/16 -j MASQUERADE
+              iptables -A FORWARD -i ens5 -o ens5 -m state --state RELATED,ESTABLISHED -j ACCEPT
+              iptables -A FORWARD -i ens5 -o ens5 -j ACCEPT
+              
+              # Save iptables rules
               service iptables save
-              chkconfig iptables on
+              
+              # Make sure services start on boot
               systemctl enable iptables
               EOF
 }
