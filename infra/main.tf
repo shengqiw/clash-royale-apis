@@ -46,6 +46,42 @@ resource "aws_key_pair" "nat_instance_key" {
   public_key = data.aws_s3_object.ssh_public_key.body
 }
 
+resource "aws_iam_role_policy" "s3_ssh_key_access" {
+  name = "s3-ssh-key-decrypt-access"
+  role = "your-terraform-execution-role"  # Replace with your actual role name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:GetObjectVersion"
+        ]
+        Resource = [
+          "arn:aws:s3:::jeetio-nat-instance",
+          "arn:aws:s3:::jeetio-nat-instance/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "kms:ViaService" = "s3.us-east-1.amazonaws.com"  # Replace with your region
+          }
+        }
+      }
+    ]
+  })
+}
+
 # -----------------
 # Lambdas & API Gateway
 # -----------------
