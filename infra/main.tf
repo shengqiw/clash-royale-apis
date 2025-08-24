@@ -35,6 +35,17 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
+data "aws_s3_object" "ssh_public_key" {
+  bucket = "jeetio-nat-instance"
+  key    = "terraform_ec2_key.pub"
+}
+
+# Create AWS Key Pair
+resource "aws_key_pair" "nat_instance_key" {
+  key_name   = "jeetio-nat-key"
+  public_key = data.aws_s3_object.ssh_public_key.body
+}
+
 # -----------------
 # Lambdas & API Gateway
 # -----------------
@@ -205,7 +216,8 @@ resource "aws_instance" "nat" {
   vpc_security_group_ids      = [aws_security_group.nat_sg.id]
   tags                        = { Name = "jeetio-nat" }
   source_dest_check          = false
-  
+  key_name                   = aws_key_pair.nat_instance_key.key_name
+
   user_data = <<-EOF
               #!/bin/bash
               # System Update and Preparation
