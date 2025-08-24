@@ -35,17 +35,6 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-data "aws_s3_object" "ssh_public_key" {
-  bucket = "jeetio-nat-instance"
-  key    = "terraform_ec2_key.pub"
-}
-
-# Create AWS Key Pair
-resource "aws_key_pair" "nat_instance_key" {
-  key_name   = "jeetio-nat-key"
-  public_key = data.aws_s3_object.ssh_public_key.body
-}
-
 resource "aws_iam_role_policy" "s3_ssh_key_access" {
   name = "s3-ssh-key-decrypt-access"
   role = "your-terraform-execution-role"  # Replace with your actual role name
@@ -80,6 +69,17 @@ resource "aws_iam_role_policy" "s3_ssh_key_access" {
       }
     ]
   })
+}
+
+data "aws_s3_object" "ssh_public_key" {
+  bucket = "jeetio-nat-instance"
+  key    = "terraform_ec2_key.pub"
+}
+
+# Create AWS Key Pair
+resource "aws_key_pair" "nat_instance_key" {
+  key_name   = "jeetio-nat-key"
+  public_key = data.aws_s3_object.ssh_public_key.body
 }
 
 # -----------------
